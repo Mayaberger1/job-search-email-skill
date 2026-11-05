@@ -106,6 +106,16 @@ Output in this order:
 
 5. **Question:** "Want me to draft follow-ups for the stalled processes?" (only if there are any).
 
+### Dashboard (optional)
+
+If the user has a job-search dashboard (a Dashboard artifact), the same report also feeds it: write three JSON files and upload them as the dashboard's datasets, keeping the columns the page already reads.
+
+- `processes.json`: one row per process: `id, company, role, stage, bucket (todo / active / closed), flag (ממתין לך / ראיון בקרוב / תקוע), last_date, last_event, action, date_label`.
+- `jobs.json`: one row per new central job: `job_id, title, company, location, match, category, category_he, student, link`.
+- `run_info.json`: one row: `run_at, window_days, digest_days, pending_count, unclear_locations, note`.
+
+Updating the dashboard is a write to the user's own artifact, not to the mailbox, so it doesn't break the read-only rule. A scheduled task can run this on a fixed schedule (for example Sunday to Thursday at 8:00).
+
 ### Step 7: Follow-up drafts (only after approval)
 
 If the user approves:
