@@ -22,20 +22,27 @@ Reply in the user's language (Hebrew if they write in Hebrew).
 
 ### Step 1: Find recruiting emails
 
-Default window: last 90 days (the user can change it). Run these Gmail searches, collect thread IDs, and remove duplicates:
+Default window: **last 30 days** for active processes (the user can change it). A 90-day window in a busy job search is about 300 threads, and one search returns at most 50, so:
 
-1. Applicant tracking systems:
-   `newer_than:90d (from:comeet-notifications.com OR from:greenhouse-mail.io OR from:ashbyhq.com OR from:hire.lever.co OR from:pinpoint.email OR from:recruitee-mailbox.com OR from:careers OR from:recruiting OR from:talent)`
-2. Phrases:
-   `newer_than:90d -in:sent ("thank you for applying" OR "thanks for applying" OR "got your application" OR "your application" OR interview OR "home assignment" OR "take-home" OR "other candidates" OR "הגשת מועמדות" OR ראיון OR מטלה)`
-3. The user's own outreach:
-   `newer_than:90d in:sent (application OR applying OR position OR role OR CV OR "קורות חיים" OR משרה)`
+- **Split the window into date ranges** of about 7 days (`after:YYYY/MM/DD before:YYYY/MM/DD`) and run each search per range. If a range still returns 50 results, split it again.
+- Run one extra search over the **last 90 days for rejection phrases only** (see `references/classification.md`), so older applications that were rejected are closed and not shown as pending.
 
-Exclude noise before reading: job-alert digests (handled in Step 5), interview-tips newsletters, receipts and invoices, and emails the user forwarded to themselves.
+Searches (run each per date range, collect thread IDs, remove duplicates):
+
+1. Applicant tracking systems and phrases:
+   `-in:sent -from:hiremetech.com (from:comeet-notifications.com OR from:greenhouse-mail.io OR from:ashbyhq.com OR from:lever.co OR from:pinpoint.email OR from:recruitee-mailbox.com OR from:bamboohr.com OR from:myworkday.com OR from:careers OR from:recruiting OR from:talent OR "thank you for applying" OR "thanks for applying" OR "got your application" OR "your application" OR interview OR "home assignment" OR "other candidates" OR "הגשת מועמדות" OR ראיון OR מטלה)`
+2. The user's own outreach:
+   `in:sent (application OR applying OR position OR role OR CV OR "קורות חיים" OR משרה)`
+3. Follow-ups on active companies: for every company at Interview or Assignment stage, search `from:<company domain> OR to:<company domain>` to catch personal emails and calendar invites that the phrase search missed.
+
+Exclude noise before reading: job-alert digests (handled in Step 5), interview-tips newsletters, receipts and invoices, training-program marketing, and emails the user forwarded to themselves.
 
 ### Step 2: Read and classify
 
-Search results show only previews. **Read each thread** (plain text) and classify it by its **body**, not its subject. Many rejections have neutral subjects such as "Thank you from <Company>" or "Application Update".
+Search results show only previews without dates. Read threads in two passes to save time:
+
+1. **Clear subjects** ("Thank you for applying for <role> at <company>", "We got your application") are Applied. Read them in the short format (subject, date, snippet) only.
+2. **Everything else** is read in full plain text and classified by its **body**, not its subject. Many rejections have neutral subjects such as "Thank you from <Company>", "Application Update" or "<role> opportunity at <company>".
 
 Classify each email into one stage. Full rules and real phrase examples are in `references/classification.md`. Stages:
 
@@ -62,18 +69,22 @@ Classify each email into one stage. Full rules and real phrase examples are in `
 Today's date is the reference point.
 
 - **Stalled:** last stage is Interview or Assignment, the event was 7 or more days ago, and nothing has arrived since. Suggest a follow-up.
-- **Waiting on you:** a recruiter asked a question or asked to schedule, and the last message in the thread is theirs.
+- **Waiting on you:** any of these, when nothing newer from the user exists:
+  - a recruiter asked a question, and the last message in the thread is theirs;
+  - an invitation to book an interview slot ("Scheduling your interview", "please pick a time") with no confirmed date after it;
+  - an assignment or online test was sent to the user and there is no submission or "received your submission" email.
 - **Interview soon:** an interview is scheduled in the next 7 days. Remind to prepare.
 - **No response (pending):** applied 30+ days ago with no reply. Show it in the table, don't suggest a follow-up (usually there is no one to write to).
 
 ### Step 5: New job matches from job-alert digests
 
-Read the job-alert digest emails from the last 3 days (default sender: `agent@agent.hiremetech.com`). Parsing rules, the central-region location list, and edge cases are in `references/job-digests.md`.
+Read the job-alert digest emails from the last 3 days (default sender: `agent@agent.hiremetech.com`). Parsing rules, the central-region list, and the category list are in `references/job-digests.md`.
 
-- Extract each job: title, company, location, match %, link.
+- Extract each job: title, company, location, match %, link. Parse each line from the right (company names can contain `|`).
 - **Keep only jobs in central Israel.** Drop the rest. Jobs with an unclear location go to a short "location unclear" line, not the main table.
 - Remove duplicates (same job ID, or same title + company).
 - Exclude jobs the user already applied to (matched against the processes from Step 3).
+- **Assign a category** (Analyst & Data, AI, DevOps & Infrastructure, QA & Testing, Design, Product & Operations, Software Development, Other). Don't filter categories out.
 - The digest has no job description. Write "see link" unless you can open the job page; never invent a description.
 
 ### Step 6: Report
@@ -88,7 +99,7 @@ Output in this order:
    | --- | --- | --- | --- | --- | --- |
 
    "Email" is the Gmail link to the latest thread.
-4. **New relevant jobs table** (from Step 5):
+4. **New jobs in central Israel** (from Step 5): one small table per category, in the category order from `references/job-digests.md`, each sorted by match %. Start with a line counting jobs per category.
 
    | Role | Company | Location | Match | Description | Apply link |
    | --- | --- | --- | --- | --- | --- |
